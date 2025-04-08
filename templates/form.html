@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Накладная</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <style>
+        .form-section { margin-bottom: 2rem; }
+        .item-row { margin-bottom: 1rem; }
+        .form-control:focus { box-shadow: none; }
+        .warehouse-labels { font-size: 0.8rem; color: #888; }
+        .spinner-border-sm { width: 1rem; height: 1rem; }
+    </style>
+</head>
+
+<body class="bg-light">
+<div class="container py-4 px-2">
+    <h2 class="mb-4">Создание накладной</h2>
+    <form method="post">
+        <div class="row form-section">
+            <div class="col-6 col-md-2">
+                <label class="form-label">Номер</label>
+                <input class="form-control" name="invoice_number" type="number" value="{{ settings.invoice_number }}">
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label">Дата</label>
+                <input class="form-control" name="date" type="date" value="{{ settings.date }}">
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label">Менеджер</label>
+                <input class="form-control" name="manager" value="{{ settings.manager }}">
+            </div>
+            <div class="col-6 col-md-4">
+                <label class="form-label">Покупатель</label>
+                <input class="form-control" name="buyer" value="{{ settings.buyer }}">
+            </div>
+        </div>
+
+        <div class="row form-section">
+            <div class="col-md-6">
+                <label class="form-label">Адрес</label>
+                <input class="form-control" name="address" value="{{ settings.address }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Способ оплаты</label>
+                <input class="form-control" name="payment_method" value="{{ settings.payment_method }}">
+            </div>
+        </div>
+
+        <h4 class="mb-3">Накладная</h4>
+        <div id="items"></div>
+
+        <button type="button" class="btn btn-outline-primary my-2" id="add-item">+ Добавить товар</button>
+
+        <div class="mt-4">
+            <button class="btn btn-success" type="submit">Сформировать накладную</button>
+        </div>
+    </form>
+
+    <div class="mt-4">
+        <button id="load-warehouse" class="btn btn-primary mb-3">
+            <span id="warehouse-loader" class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+            Подгрузить склад
+        </button>
+    </div>
+</div>
+
+<!-- JS и jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+<script>
+    let warehouseData = [];
+
+    function createItemRow() {
+        const row = document.createElement("div");
+        row.className = "row item-row align-items-end";
+        row.innerHTML = `
+            <div class="col-6 col-md-2">
+                <input class="form-control" name="article" placeholder="Артикул">
+            </div>
+            <div class="col-6 col-md-4">
+                <input class="form-control item-name" name="name" placeholder="Название">
+                <div class="warehouse-labels">
+                    <span class="stock-label">Склад: —</span> | 
+                    <span class="price-label">Цена: —</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <input class="form-control" name="quantity" placeholder="Кол-во" type="number" required>
+            </div>
+            <div class="col-6 col-md-2">
+                <input class="form-control" name="price" placeholder="Цена" type="number" step="0.01" required>
+            </div>
+            <div class="col-12 col-md-2 text-end mt-2 mt-md-0">
+                <button type="button" class="btn btn-danger remove-item">−</button>
+            </div>
+        `;
+        return row;
+    }
+
+    function bindAutocomplete(input) {
+        $(input).autocomplete({
+            source: warehouseData.map(item => item.name),
+            select: function(event, ui) {
+                const selectedItem = warehouseData.find(i => i.name === ui.item.value);
+                const row = $(this).closest(".item-row");
+
+                if (selectedItem) {
+                    row.find("input[name='price']").val(selectedItem.price);
+                    row.find("input[name='quantity']").val(1);
+                    row.find(".stock-label").text("Склад: " + selectedItem.quantity);
+                    row.find(".price-label").text("Цена: " + selectedItem.price + "Р");
+                }
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        // Подгрузка склада
+        $("#load-warehouse").click(function (e) {
+            e.preventDefault();
+            $("#warehouse-loader").removeClass("d-none");
+
+            $.get("/update_warehouse", function () {
+                alert("✅ Склад обновлен!");
+                location.reload();
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                alert("❌ Ошибка: " + textStatus + " " + errorThrown);
+            }).always(() => {
+                $("#warehouse-loader").addClass("d-none");
+            });
+        });
+
+        // Получение данных склада
+        $.getJSON("/warehouse", function(data) {
+            warehouseData = data;
+        });
+
+        // Добавление строки
+        $("#add-item").on("click", function () {
+            const row = createItemRow();
+            document.getElementById("items").appendChild(row);
+            bindAutocomplete($(row).find(".item-name"));
+        });
+
+        // Удаление строки
+        document.addEventListener("click", function (e) {
+            if (e.target.classList.contains("remove-item")) {
+                e.target.closest(".item-row").remove();
+            }
+        });
+    });
+</script>
+</body>
+</html>

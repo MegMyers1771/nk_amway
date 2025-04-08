@@ -1,0 +1,4 @@
+.env/
+nikitastorage.json
+warehouse.json
+__pycache__/
