@@ -62,9 +62,10 @@ def update_warehouse_after_invoice(invoice_items):
                 break
 
 
-
-
-if not os.path.exists(warehouse_path):
+def dump_warehouse():
     items = load_warehouse_items()
     with open(warehouse_path, "w", encoding="utf-8") as f:
         json.dump(items, f, ensure_ascii=False, indent=2)
+
+if not os.path.exists(warehouse_path):
+    dump_warehouse()

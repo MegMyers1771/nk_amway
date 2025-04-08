@@ -4,7 +4,8 @@ import tempfile
 import os
 import json
 import subprocess
-from warehouse import load_warehouse_items, update_warehouse_after_invoice
+import sys
+from warehouse import load_warehouse_items, update_warehouse_after_invoice, dump_warehouse
 from aio import process_invoice_template  # Импортируем твою функцию
 
 app = Flask(__name__)
@@ -26,7 +27,6 @@ def update_warehouse():
     items = load_warehouse_items()
     with open("warehouse.json", "w", encoding="utf-8") as f:
         json.dump(items, f, ensure_ascii=False, indent=2)
-    print('good goood')
     return "OK"
 
 @app.route("/warehouse")
@@ -112,10 +112,13 @@ def form():
         )
 
         update_warehouse_after_invoice(items)
-
-        pdf_path = convert_xlsx_to_pdf(output_path)
-
-        return send_file(pdf_path, as_attachment=True, download_name=f"am_nakladnaya_{new_date}.pdf")
+        dump_warehouse()
+        
+        if sys.platform != "win32":
+            pdf_path = convert_xlsx_to_pdf(output_path)
+            return send_file(pdf_path, as_attachment=True, download_name=f"am_nakladnaya_{new_date}.pdf")
+        else:
+            return send_file(output_path, as_attachment=True, download_name=f"am_nakladnaya_{new_date}.xlsx")
 
     return render_template("form.html", settings=settings)
 
