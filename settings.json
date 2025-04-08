@@ -4,5 +4,6 @@
   "manager": "Лобанов В.В.",
   "buyer": "ООО Хуй",
   "address": "Петропавлоск 2",
-  "payment_method": "Наличный расчет"
+  "payment_method": "Наличный расчет",
+  "invoice_link": "https://docs.google.com/spreadsheets/d/135TzPDuf6r_Bgw3Hf1N2rldaoZNecmQnEkukbl_U6WA/edit?gid=1173281585#gid=1173281585"
 }

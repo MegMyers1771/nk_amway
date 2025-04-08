@@ -8,11 +8,24 @@ scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/au
 creds = ServiceAccountCredentials.from_json_keyfile_name('nikitastorage.json', scope)
 client = gspread.authorize(creds)
 
+def get_invoice_link():
+    if os.path.exists("settings.json"):
+        with open("settings.json", "r", encoding="utf-8") as f:
+            settings = json.load(f)
+            invoice_link = settings.get("invoice_link")
+            print(invoice_link)
+            gid = int(invoice_link.split('=')[2])
+            return (invoice_link, gid)
+            # return settings.get("invoice_link", "")
+    return ""
+
+
 def load_warehouse_items():
 
     # Открытие листа
-    sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/135TzPDuf6r_Bgw3Hf1N2rldaoZNecmQnEkukbl_U6WA/edit#gid=1173281585")
-    worksheet = sheet.get_worksheet_by_id(1173281585)
+    inv_link, gid = get_invoice_link()
+    sheet = client.open_by_url(inv_link)
+    worksheet = sheet.get_worksheet_by_id(gid)
 
     # Получаем все строки начиная со второй
     data = worksheet.get_all_values()[1:]  # Пропускаем заголовок
@@ -38,8 +51,9 @@ def update_warehouse_after_invoice(invoice_items):
     invoice_items: список словарей с полями "name" и "quantity" (списание)
     """
 
-    sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/135TzPDuf6r_Bgw3Hf1N2rldaoZNecmQnEkukbl_U6WA/edit#gid=1173281585")
-    worksheet = sheet.get_worksheet_by_id(1173281585)
+    inv_link, gid = get_invoice_link()
+    sheet = client.open_by_url(inv_link)
+    worksheet = sheet.get_worksheet_by_id(gid)
 
     data = worksheet.get_all_values()
     headers = data[0]

@@ -65,6 +65,13 @@
             Подгрузить склад
         </button>
     </div>
+    <div class="col-md-12 mt-3 d-flex align-items-end">
+        <div class="flex-grow-1 me-2">
+            <label class="form-label">Ссылка на накладную</label>
+            <input class="form-control" id="invoice-link" value="{{ settings.invoice_link }}">
+        </div>
+        <button type="button" class="btn btn-outline-success mb-1" id="save-link">💾</button>
+    </div>
 </div>
 
 <!-- JS и jQuery -->
@@ -153,6 +160,22 @@
             }
         });
     });
+    $("#save-link").click(function () {
+        const link = $("#invoice-link").val();
+        $.ajax({
+            url: "/save_invoice_link",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ invoice_link: link }),
+            success: function () {
+                alert("✅ Ссылка сохранена!");
+            },
+            error: function () {
+                alert("❌ Ошибка при сохранении.");
+            }
+        });
+    });
+
 </script>
 </body>
 </html>

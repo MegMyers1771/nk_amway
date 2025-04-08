@@ -5,7 +5,7 @@ import os
 import json
 import subprocess
 import sys
-from warehouse import load_warehouse_items, update_warehouse_after_invoice, dump_warehouse
+from warehouse import load_warehouse_items, update_warehouse_after_invoice, dump_warehouse, get_invoice_link
 from aio import process_invoice_template  # Импортируем твою функцию
 
 app = Flask(__name__)
@@ -20,6 +20,17 @@ def convert_xlsx_to_pdf(xlsx_path: str):
     subprocess.run(["libreoffice", "--headless", "--convert-to", "pdf", xlsx_path, '--outdir', '/tmp'])
     
     return pdf_path
+
+@app.route("/save_invoice_link", methods=["POST"])
+def save_invoice_link():
+    data = request.get_json()
+    invoice_link = data.get("invoice_link", "")
+
+    settings = load_settings()
+    settings["invoice_link"] = invoice_link
+    save_settings(settings)
+
+    return jsonify({"status": "ok"})
 
 
 @app.route("/update_warehouse")
@@ -57,6 +68,7 @@ def form():
     settings = load_settings()
 
     if request.method == "POST":
+        # invoice_link = request.form.get("invoice_link", "")
         invoice_number = int(request.form.get("invoice_number", 1))
         date = request.form.get("date")
         manager = request.form.get("manager")
@@ -72,6 +84,7 @@ def form():
             "buyer": buyer,
             "address": address,
             "payment_method": payment_method,
+            "invoice_link": get_invoice_link()[0]
         }
         save_settings(settings)
 
