@@ -3,12 +3,23 @@ from datetime import datetime
 import tempfile
 import os
 import json
+import subprocess
 from warehouse import load_warehouse_items, update_warehouse_after_invoice
 from aio import process_invoice_template  # Импортируем твою функцию
 
 app = Flask(__name__)
 
 SETTINGS_FILE = "settings.json"
+
+def convert_xlsx_to_pdf(xlsx_path: str):
+    # Путь для временного файла PDF
+    pdf_path = xlsx_path.replace(".xlsx", ".pdf")
+
+    # Используем LibreOffice для конвертации XLSX в PDF
+    subprocess.run(["libreoffice", "--headless", "--convert-to", "pdf", xlsx_path])
+    
+    return pdf_path
+
 
 @app.route("/update_warehouse")
 def update_warehouse():
@@ -102,9 +113,9 @@ def form():
 
         update_warehouse_after_invoice(items)
 
-        
+        pdf_path = convert_xlsx_to_pdf(output_path)
 
-        return send_file(output_path, as_attachment=True, download_name=f"am_nakladnaya_{new_date}.xlsx")
+        return send_file(pdf_path, as_attachment=True, download_name=f"am_nakladnaya_{new_date}.pdf")
 
     return render_template("form.html", settings=settings)
 
