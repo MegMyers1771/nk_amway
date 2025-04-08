@@ -1,5 +1,6 @@
 .env/
 nikitastorage.json
+settings.json
 warehouse.json
 __pycache__/
 guvirun.sh
