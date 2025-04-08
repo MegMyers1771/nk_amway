@@ -133,22 +133,3 @@ def process_invoice_template(
 
     # 8. Сохраняем результат
     wb.save(output_path)
-
-# Пример данных
-# items = [
-#     {"article": "124111", "name": "АМ Спрей-освежитель полости рта с запахом мяты ТМ GLISTER/14мл", "quantity": 3, "price": 433},
-#     {"article": "124106", "name": "Многофункц. зубная паста", "quantity": 5, "price": 670},
-#     {"article": "125896", "name": "Шариковый дезодорант", "quantity": 2, "price": 604},
-# ]
-
-# process_invoice_template(
-#     template_path="main_template.xlsx",
-#     output_path="накладная_финал2.xlsx",
-#     items=items,
-#     invoice_number=3,
-#     date=datetime(2025, 4, 3).strftime("%d.%m.%Y"),
-#     manager="Иванов И.И.",
-#     buyer="ООО Покупатель",
-#     address="г. Москва, ул. Примерная, д. 5",
-#     payment_method="Наличный расчет"
-# )
