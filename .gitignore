@@ -1,6 +1,6 @@
 .env/
-nikitastorage.json
-settings.json
-warehouse.json
 __pycache__/
+settings.json
+nikitastorage.json
+warehouse.json
 guvirun.sh
