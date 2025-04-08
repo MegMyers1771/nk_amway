@@ -16,7 +16,7 @@ def convert_xlsx_to_pdf(xlsx_path: str):
     pdf_path = xlsx_path.replace(".xlsx", ".pdf")
 
     # Используем LibreOffice для конвертации XLSX в PDF
-    subprocess.run(["libreoffice", "--headless", "--convert-to", "pdf", xlsx_path])
+    subprocess.run(["libreoffice", "--headless", "--convert-to", "pdf", xlsx_path, '--outdir', '/tmp'])
     
     return pdf_path
 
